@@ -1,0 +1,27 @@
+load('ext://helm_resource', 'helm_resource', 'helm_repo')
+
+def setup(namespace, paths=".", livereload=False):
+  helm_resource('service-c', paths + '/chart',
+    namespace=namespace,
+    flags=[
+      "--create-namespace"
+    ] + [
+      "--set=args[0]=npm",
+      "--set=args[1]=run",
+      "--set=args[2]=dev",
+    ] if livereload else [],
+    image_deps=["service-c"],
+    image_keys=[
+      ("image.name", "image.tag"),
+    ],
+    deps=[
+      paths + "/chart",
+    ] if livereload else [],
+  )
+
+  docker_build('service-c', paths,
+    dockerfile=paths + "/Dockerfile",
+    live_update=[
+        sync(paths + "/src", "/app/src"),
+        run("npm install", trigger=[paths + '/package.json']),
+    ] if livereload else [],)

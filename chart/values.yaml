@@ -1,0 +1,4 @@
+image:
+  name: kkfakeregistry.com/service-c
+  tag: v1
+args: []
